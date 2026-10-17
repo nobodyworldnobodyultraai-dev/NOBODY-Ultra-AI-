@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace 'com.nobody.ultraai'   // required in AGP 8+; replaces package in the manifest
+    namespace 'com.nobody.ultraai'
     compileSdk 34
 
     defaultConfig {
@@ -25,5 +25,5 @@ android {
 dependencies {
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.ai.client.generativeai:generativeai:0.9.0'  // Gemini SDK
+    implementation 'com.google.ai.client.generativeai:generativeai:0.9.0' // Gemini SDK
 }
