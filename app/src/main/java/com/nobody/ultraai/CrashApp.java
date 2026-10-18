@@ -1,0 +1,1 @@
+package com.nobody.ultraai;import android.app.Application;import android.util.Log;public class CrashApp extends Application{@Override public void onCreate(){super.onCreate();Thread.setDefaultUncaughtExceptionHandler((thread, throwable)->{Log.e("FATAL_CRASH","App crashed: "+throwable.getMessage(),throwable);System.exit(1);});}}
