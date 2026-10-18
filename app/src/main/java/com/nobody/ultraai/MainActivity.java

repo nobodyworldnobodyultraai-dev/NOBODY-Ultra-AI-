@@ -1,41 +1,85 @@
 package com.nobody.ultraai;
 
+import android.app.Activity;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import androidx.appcompat.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
-    private WebView webView;
+  private static final String P = "crash";
+  private static final String K = "last";
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        // वेबव्यू बनाना
-        webView = new WebView(this);
-        setContentView(webView);
-
-        // वेबव्यू सेटिंग्स
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setAllowFileAccess(true);
-
-        webView.setWebViewClient(new WebViewClient());
-
-        // सिंपल और सुरक्षित HTML लोड करना
-        String safeHtml = "<!DOCTYPE html><html><head><style>"
-                + "body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; text-align: center; padding-top: 40%; }"
-                + "h1 { color: #38bdf8; font-size: 28px; }"
-                + "p { color: #94a3b8; font-size: 16px; }"
-                + "</style></head><body>"
-                + "<h1>NOBODY ULTRA AI</h1>"
-                + "<p>System Engine & Autonomous Assistant Active</p>"
-                + "</body></html>";
-
-        webView.loadDataWithBaseURL(null, safeHtml, "text/html", "utf-8", null);
+  @Override
+  protected void onCreate(Bundle b) {
+    super.onCreate(b);
+    final SharedPreferences sp =
+        getSharedPreferences(P, MODE_PRIVATE);
+    final Thread.UncaughtExceptionHandler old =
+        Thread.getDefaultUncaughtExceptionHandler();
+    Thread.setDefaultUncaughtExceptionHandler(
+        new Thread.UncaughtExceptionHandler() {
+      public void uncaughtException(Thread t, Throwable e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        sp.edit().putString(K, sw.toString()).commit();
+        if (old != null) old.uncaughtException(t, e);
+      }
+    });
+    try {
+      show(sp);
+    } catch (Throwable e) {
+      StringWriter sw = new StringWriter();
+      e.printStackTrace(new PrintWriter(sw));
+      TextView tv = new TextView(this);
+      tv.setText("ERROR:\n" + sw);
+      tv.setTextIsSelectable(true);
+      setContentView(tv);
     }
+  }
+
+  private void show(final SharedPreferences sp) {
+    int p = (int) (16 *
+        getResources().getDisplayMetrics().density);
+    LinearLayout root = new LinearLayout(this);
+    root.setOrientation(LinearLayout.VERTICAL);
+    root.setPadding(p, p * 2, p, p);
+    root.setBackgroundColor(Color.BLACK);
+
+    TextView title = new TextView(this);
+    title.setText("NOBODY Ultra AI is running");
+    title.setTextColor(Color.GREEN);
+    title.setTextSize(22);
+    root.addView(title);
+
+    String last = sp.getString(K, null);
+    final TextView log = new TextView(this);
+    log.setTextColor(Color.WHITE);
+    log.setTextIsSelectable(true);
+    log.setText(last == null
+        ? "No crash recorded."
+        : "LAST CRASH:\n" + last);
+    ScrollView sv = new ScrollView(this);
+    sv.addView(log);
+    root.addView(sv);
+
+    Button clear = new Button(this);
+    clear.setText("Clear crash log");
+    clear.setOnClickListener(new View.OnClickListener() {
+      public void onClick(View v) {
+        sp.edit().remove(K).commit();
+        log.setText("No crash recorded.");
+      }
+    });
+    root.addView(clear);
+
+    setContentView(root);
+  }
 }
