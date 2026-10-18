@@ -1,3 +1,4 @@
+
 name: Build NOBODY Ultra AI APK
 
 on:
@@ -24,11 +25,8 @@ jobs:
         with:
           gradle-version: '8.5'
 
-      - name: Clean build
-        run: gradle clean
-
       - name: Build Debug APK
-        run: gradle assembleDebug --stacktrace
+        run: gradle clean assembleDebug --stacktrace --no-build-cache
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
