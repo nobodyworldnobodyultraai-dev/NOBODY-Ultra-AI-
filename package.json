@@ -1,13 +1,16 @@
 {
   "name": "nobody-ultra-ai",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "NOBODY Ultra AI - Core Engine and Automation Hub",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
-    "@google/genai": "^0.1.1",
+    "@google/genai": "^1.0.0",
     "express": "^4.19.2"
   }
 }
