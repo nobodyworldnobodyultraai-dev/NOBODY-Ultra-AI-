@@ -14,22 +14,28 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // वेबव्यू बनाना
         webView = new WebView(this);
         setContentView(webView);
 
+        // वेबव्यू सेटिंग्स
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
+        webSettings.setAllowFileAccess(true);
 
         webView.setWebViewClient(new WebViewClient());
 
-        // Load NOBODY Ultra AI Dashboard Interface
-        String customHtml = "<html><body style='background:#0f172a;color:#f8fafc;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;'>"
-                + "<div style='text-align:center;'>"
-                + "<h1 style='color:#38bdf8;'>NOBODY ULTRA AI</h1>"
-                + "<p style='color:#94a3b8;'>System Engine & Autonomous Assistant Active</p>"
-                + "</div></body></html>";
+        // सिंपल और सुरक्षित HTML लोड करना
+        String safeHtml = "<!DOCTYPE html><html><head><style>"
+                + "body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; text-align: center; padding-top: 40%; }"
+                + "h1 { color: #38bdf8; font-size: 28px; }"
+                + "p { color: #94a3b8; font-size: 16px; }"
+                + "</style></head><body>"
+                + "<h1>NOBODY ULTRA AI</h1>"
+                + "<p>System Engine & Autonomous Assistant Active</p>"
+                + "</body></html>";
 
-        webView.loadDataWithBaseURL(null, customHtml, "text/html", "UTF-8", null);
+        webView.loadDataWithBaseURL(null, safeHtml, "text/html", "utf-8", null);
     }
 }
