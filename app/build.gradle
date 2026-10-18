@@ -1,21 +1,9 @@
-plugins {
-    id 'com.android.application'
-}
-
 android {
-    namespace 'com.nobody.ultraai'
-    compileSdk 34
-
-    defaultConfig {
-        applicationId "com.nobody.ultraai"
-        minSdk 24
-        targetSdk 34
-        versionCode 3
-        versionName "1.2"
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+    compileSdk 35
+    
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java']
+        }
     }
 }
