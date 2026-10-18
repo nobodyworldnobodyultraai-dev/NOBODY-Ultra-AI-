@@ -1,11 +1,11 @@
-plugins {
-    id 'com.android.application'
-}
-
 android {
     compileSdk 35
-    namespace "com.nobody.ultraai"
-    
+    namespace 'com.nobody.ultraai'
+
+    aaptOptions {
+        ignoreAssetsPattern '!*.hprof:!*.p2p:!*.pyc:!*.pyo:!*.rb:!*.yarb:!*~'
+    }
+
     defaultConfig {
         applicationId "com.nobody.ultraai"
         minSdk 21
@@ -13,24 +13,24 @@ android {
         versionCode 1
         versionName "1.0"
     }
-    
+
     buildTypes {
         release {
             minifyEnabled false
         }
         debug {
-            debuggable true
+            minifyEnabled false
         }
     }
-    
+
     sourceSets {
         main {
             java.srcDirs = ['src/main/java']
         }
     }
-}
 
-dependencies {
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    dependencies {
+        implementation 'androidx.appcompat:appcompat:1.6.1'
+        implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    }
 }
