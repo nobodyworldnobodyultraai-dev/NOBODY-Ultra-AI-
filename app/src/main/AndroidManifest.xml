@@ -1,33 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.nobody.ultraai">
+plugins {
+    id 'com.android.application'
+}
 
-    <uses-permission android:name="android.permission.INTERNET" />
+android {
+    namespace 'com.nobody.ultraai'
+    compileSdk 34
 
-    <application
-        android:name=".CrashApp"
-        android:allowBackup="true"
-        android:icon="@android:drawable/sym_def_app_icon"
-        android:label="TEST3"
-        android:theme="@android:style/Theme.Material.NoActionBar"
-        android:usesCleartextTraffic="true">
+    defaultConfig {
+        applicationId "com.nobody.ultraai"
+        minSdk 24
+        targetSdk 34
+        versionCode 3
+        versionName "1.2"
+    }
 
-        <activity
-            android:name=".LogActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".CrashActivity"
-            android:exported="false" />
-
-    </application>
-</manifest>
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
