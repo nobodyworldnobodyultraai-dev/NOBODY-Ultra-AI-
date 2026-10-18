@@ -4,6 +4,7 @@ plugins {
 
 android {
     compileSdk 35
+    namespace "com.nobody.ultraai"
     
     defaultConfig {
         applicationId "com.nobody.ultraai"
