@@ -1,94 +1,103 @@
 package com.nobody.ultraai;
 
 import android.app.Activity;
+import android.content.pm.PackageInfo;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.ViewGroup;
-import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.FrameLayout;
-import android.widget.ScrollView;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
+import java.util.Arrays;
+
+/**
+ * TEST VERSION: ऐप पहले बिना WebView के खुलता है.
+ * अगर यह खुला रहा -> WebView / index.html में दिक्कत है.
+ * अगर यह भी बंद हो गया -> दिक्कत WebView से पहले, ऐप या फोन के स्तर पर है.
+ */
 public class MainActivity extends Activity {
-    private static final String TAG = "UltraAI";
+
+    private LinearLayout box;
+    private TextView logView;
     private WebView webView;
-    private FrameLayout root;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final Thread.UncaughtExceptionHandler old = Thread.getDefaultUncaughtExceptionHandler();
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-            Log.e(TAG, "FATAL", e);
-            runOnUiThread(() -> showError(e));
-        });
+
+        box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setBackgroundColor(Color.BLACK);
+        box.setPadding(24, 64, 24, 24);
+
+        logView = new TextView(this);
+        logView.setTextColor(Color.WHITE);
+        logView.setTextSize(13);
+        logView.setTextIsSelectable(true);
+
+        Button btn = new Button(this);
+        btn.setText("START WEBVIEW");
+        btn.setOnClickListener(v -> startWebView());
+
+        box.addView(btn);
+        box.addView(logView);
+        setContentView(box);
+
+        log("STARTED OK");
+        log("Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")");
+        log("Device: " + Build.MANUFACTURER + " " + Build.MODEL);
+        log("ABI: " + Arrays.toString(Build.SUPPORTED_ABIS));
+
         try {
-            root = new FrameLayout(this);
-            root.setBackgroundColor(Color.BLACK);
-            setContentView(root, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            setupWebView();
-            new Thread(() -> {
-                try {
-                    Log.i(TAG, "Engine started");
-                } catch (Throwable e) {
-                    Log.e(TAG, "Engine failed", e);
-                    runOnUiThread(() -> showError(e));
-                }
-            }, "engine-init").start();
+            PackageInfo pi = WebView.getCurrentWebViewPackage();
+            log("WebView: " + (pi == null ? "NONE (installed नहीं है!)" : pi.packageName + " v" + pi.versionName));
         } catch (Throwable e) {
-            Log.e(TAG, "onCreate failed", e);
-            showError(e);
+            log("WebView info error: " + e);
+        }
+
+        try {
+            log("assets: " + Arrays.toString(getAssets().list("")));
+        } catch (Throwable e) {
+            log("assets error: " + e);
         }
     }
 
-    private void setupWebView() {
-        webView = new WebView(this);
-        webView.setBackgroundColor(Color.BLACK);
-        WebSettings s = webView.getSettings();
-        s.setJavaScriptEnabled(true);
-        s.setDomStorageEnabled(true);
-        s.setAllowFileAccess(true);
-        s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        webView.setWebChromeClient(new WebChromeClient());
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onReceivedError(WebView v, WebResourceRequest r, WebResourceError err) {
-                if (r.isForMainFrame()) {
-                    showError(new RuntimeException("WebView load failed: " + r.getUrl() + "\n" + err.getDescription()));
+    private void startWebView() {
+        try {
+            log("creating WebView...");
+            webView = new WebView(this);
+            WebSettings s = webView.getSettings();
+            s.setJavaScriptEnabled(true);
+            s.setDomStorageEnabled(true);
+            webView.setBackgroundColor(Color.BLACK);
+            webView.setWebViewClient(new WebViewClient() {
+                @Override
+                public void onPageFinished(WebView v, String url) {
+                    log("page finished: " + url);
                 }
-            }
-        });
-        root.addView(webView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        webView.loadUrl("file:///android_asset/index.html");
+
+                @Override
+                public void onReceivedError(WebView v, WebResourceRequest r, WebResourceError err) {
+                    log("load error: " + r.getUrl() + " -> " + err.getDescription());
+                }
+            });
+            box.addView(webView, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+            log("WebView created, loading index.html...");
+            webView.loadUrl("file:///android_asset/index.html");
+        } catch (Throwable e) {
+            log("WebView FAILED: " + e);
+        }
     }
 
-    private void showError(Throwable e) {
-        StringWriter sw = new StringWriter();
-        e.printStackTrace(new PrintWriter(sw));
-        TextView tv = new TextView(this);
-        tv.setTextColor(Color.WHITE);
-        tv.setTextSize(12);
-        tv.setPadding(24, 48, 24, 24);
-        tv.setTextIsSelectable(true);
-        tv.setText("CRASH:\n\n" + sw);
-        ScrollView sv = new ScrollView(this);
-        sv.setBackgroundColor(Color.BLACK);
-        sv.addView(tv);
-        setContentView(sv);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (webView != null && webView.canGoBack()) webView.goBack();
-        else super.onBackPressed();
+    private void log(String s) {
+        logView.append(s + "\n");
     }
 
     @Override
