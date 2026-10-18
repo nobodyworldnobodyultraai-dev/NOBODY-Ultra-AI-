@@ -8,18 +8,22 @@
         android:name=".CrashApp"
         android:allowBackup="true"
         android:icon="@android:drawable/sym_def_app_icon"
-        android:label="TEST2"
+        android:label="TEST3"
         android:theme="@android:style/Theme.Material.NoActionBar"
         android:usesCleartextTraffic="true">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".LogActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
 
         <activity
             android:name=".CrashActivity"
