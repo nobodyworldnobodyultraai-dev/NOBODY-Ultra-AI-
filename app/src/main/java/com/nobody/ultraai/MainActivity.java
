@@ -1,85 +1,99 @@
 package com.nobody.ultraai;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import android.util.Log;
+import android.view.ViewGroup;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 public class MainActivity extends Activity {
+    private static final String TAG = "UltraAI";
+    private WebView webView;
+    private FrameLayout root;
 
-  private static final String P = "crash";
-  private static final String K = "last";
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        final Thread.UncaughtExceptionHandler old = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            Log.e(TAG, "FATAL", e);
+            runOnUiThread(() -> showError(e));
+        });
+        try {
+            root = new FrameLayout(this);
+            root.setBackgroundColor(Color.BLACK);
+            setContentView(root, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            setupWebView();
+            new Thread(() -> {
+                try {
+                    Log.i(TAG, "Engine started");
+                } catch (Throwable e) {
+                    Log.e(TAG, "Engine failed", e);
+                    runOnUiThread(() -> showError(e));
+                }
+            }, "engine-init").start();
+        } catch (Throwable e) {
+            Log.e(TAG, "onCreate failed", e);
+            showError(e);
+        }
+    }
 
-  @Override
-  protected void onCreate(Bundle b) {
-    super.onCreate(b);
-    final SharedPreferences sp =
-        getSharedPreferences(P, MODE_PRIVATE);
-    final Thread.UncaughtExceptionHandler old =
-        Thread.getDefaultUncaughtExceptionHandler();
-    Thread.setDefaultUncaughtExceptionHandler(
-        new Thread.UncaughtExceptionHandler() {
-      public void uncaughtException(Thread t, Throwable e) {
+    private void setupWebView() {
+        webView = new WebView(this);
+        webView.setBackgroundColor(Color.BLACK);
+        WebSettings s = webView.getSettings();
+        s.setJavaScriptEnabled(true);
+        s.setDomStorageEnabled(true);
+        s.setAllowFileAccess(true);
+        s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onReceivedError(WebView v, WebResourceRequest r, WebResourceError err) {
+                if (r.isForMainFrame()) {
+                    showError(new RuntimeException("WebView load failed: " + r.getUrl() + "\n" + err.getDescription()));
+                }
+            }
+        });
+        root.addView(webView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        webView.loadUrl("file:///android_asset/index.html");
+    }
+
+    private void showError(Throwable e) {
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
-        sp.edit().putString(K, sw.toString()).commit();
-        if (old != null) old.uncaughtException(t, e);
-      }
-    });
-    try {
-      show(sp);
-    } catch (Throwable e) {
-      StringWriter sw = new StringWriter();
-      e.printStackTrace(new PrintWriter(sw));
-      TextView tv = new TextView(this);
-      tv.setText("ERROR:\n" + sw);
-      tv.setTextIsSelectable(true);
-      setContentView(tv);
+        TextView tv = new TextView(this);
+        tv.setTextColor(Color.WHITE);
+        tv.setTextSize(12);
+        tv.setPadding(24, 48, 24, 24);
+        tv.setTextIsSelectable(true);
+        tv.setText("CRASH:\n\n" + sw);
+        ScrollView sv = new ScrollView(this);
+        sv.setBackgroundColor(Color.BLACK);
+        sv.addView(tv);
+        setContentView(sv);
     }
-  }
 
-  private void show(final SharedPreferences sp) {
-    int p = (int) (16 *
-        getResources().getDisplayMetrics().density);
-    LinearLayout root = new LinearLayout(this);
-    root.setOrientation(LinearLayout.VERTICAL);
-    root.setPadding(p, p * 2, p, p);
-    root.setBackgroundColor(Color.BLACK);
+    @Override
+    public void onBackPressed() {
+        if (webView != null && webView.canGoBack()) webView.goBack();
+        else super.onBackPressed();
+    }
 
-    TextView title = new TextView(this);
-    title.setText("NOBODY Ultra AI is running");
-    title.setTextColor(Color.GREEN);
-    title.setTextSize(22);
-    root.addView(title);
-
-    String last = sp.getString(K, null);
-    final TextView log = new TextView(this);
-    log.setTextColor(Color.WHITE);
-    log.setTextIsSelectable(true);
-    log.setText(last == null
-        ? "No crash recorded."
-        : "LAST CRASH:\n" + last);
-    ScrollView sv = new ScrollView(this);
-    sv.addView(log);
-    root.addView(sv);
-
-    Button clear = new Button(this);
-    clear.setText("Clear crash log");
-    clear.setOnClickListener(new View.OnClickListener() {
-      public void onClick(View v) {
-        sp.edit().remove(K).commit();
-        log.setText("No crash recorded.");
-      }
-    });
-    root.addView(clear);
-
-    setContentView(root);
-  }
+    @Override
+    protected void onDestroy() {
+        if (webView != null) { webView.destroy(); webView = null; }
+        super.onDestroy();
+    }
 }
