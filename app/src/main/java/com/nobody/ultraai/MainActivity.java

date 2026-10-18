@@ -1,27 +1,31 @@
 package com.nobody.ultraai;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
-        
+        box.setBackgroundColor(Color.BLACK);
+        box.setPadding(24, 64, 24, 24);
+
         TextView tv = new TextView(this);
-        tv.setText("NOBODY Ultra AI v1.0\nApp Started Successfully!");
-        tv.setTextColor(android.graphics.Color.WHITE);
-        tv.setTextSize(18);
-        
+        tv.setTextColor(Color.WHITE);
+        tv.setTextSize(16);
+        tv.setText("NOBODY Ultra AI\n\nMainActivity loaded successfully.");
+
         box.addView(tv);
         setContentView(box);
-        
-        android.util.Log.d("NOBODY_ULTRAAI", "MainActivity loaded successfully");
+
+        Log.d("NOBODY_ULTRAI", "MainActivity loaded successfully");
     }
 }
