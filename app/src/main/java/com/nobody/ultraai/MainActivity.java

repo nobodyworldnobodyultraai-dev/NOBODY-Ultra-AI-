@@ -1,108 +1,27 @@
 package com.nobody.ultraai;
 
 import android.app.Activity;
-import android.content.pm.PackageInfo;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.Arrays;
-
-/**
- * TEST VERSION: ऐप पहले बिना WebView के खुलता है.
- * अगर यह खुला रहा -> WebView / index.html में दिक्कत है.
- * अगर यह भी बंद हो गया -> दिक्कत WebView से पहले, ऐप या फोन के स्तर पर है.
- */
 public class MainActivity extends Activity {
-
-    private LinearLayout box;
-    private TextView logView;
-    private WebView webView;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        box = new LinearLayout(this);
+        
+        LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
-        box.setBackgroundColor(Color.BLACK);
-        box.setPadding(24, 64, 24, 24);
-
-        logView = new TextView(this);
-        logView.setTextColor(Color.WHITE);
-        logView.setTextSize(13);
-        logView.setTextIsSelectable(true);
-
-        Button btn = new Button(this);
-        btn.setText("START WEBVIEW");
-        btn.setOnClickListener(v -> startWebView());
-
-        box.addView(btn);
-        box.addView(logView);
+        
+        TextView tv = new TextView(this);
+        tv.setText("NOBODY Ultra AI v1.0\nApp Started Successfully!");
+        tv.setTextColor(android.graphics.Color.WHITE);
+        tv.setTextSize(18);
+        
+        box.addView(tv);
         setContentView(box);
-
-        log("STARTED OK");
-        log("Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")");
-        log("Device: " + Build.MANUFACTURER + " " + Build.MODEL);
-        log("ABI: " + Arrays.toString(Build.SUPPORTED_ABIS));
-
-        try {
-            PackageInfo pi = WebView.getCurrentWebViewPackage();
-            log("WebView: " + (pi == null ? "NONE (installed नहीं है!)" : pi.packageName + " v" + pi.versionName));
-        } catch (Throwable e) {
-            log("WebView info error: " + e);
-        }
-
-        try {
-            log("assets: " + Arrays.toString(getAssets().list("")));
-        } catch (Throwable e) {
-            log("assets error: " + e);
-        }
-    }
-
-    private void startWebView() {
-        try {
-            log("creating WebView...");
-            webView = new WebView(this);
-            WebSettings s = webView.getSettings();
-            s.setJavaScriptEnabled(true);
-            s.setDomStorageEnabled(true);
-            webView.setBackgroundColor(Color.BLACK);
-            webView.setWebViewClient(new WebViewClient() {
-                @Override
-                public void onPageFinished(WebView v, String url) {
-                    log("page finished: " + url);
-                }
-
-                @Override
-                public void onReceivedError(WebView v, WebResourceRequest r, WebResourceError err) {
-                    log("load error: " + r.getUrl() + " -> " + err.getDescription());
-                }
-            });
-            box.addView(webView, new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
-            log("WebView created, loading index.html...");
-            webView.loadUrl("file:///android_asset/index.html");
-        } catch (Throwable e) {
-            log("WebView FAILED: " + e);
-        }
-    }
-
-    private void log(String s) {
-        logView.append(s + "\n");
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (webView != null) { webView.destroy(); webView = null; }
-        super.onDestroy();
+        
+        android.util.Log.d("NOBODY_ULTRAAI", "MainActivity loaded successfully");
     }
 }
