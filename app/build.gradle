@@ -6,21 +6,6 @@ android {
     compileSdk 35
     namespace "com.nobody.ultraai"
     
-    signingConfigs {
-        release {
-            storeFile file("debug.keystore")
-            storePassword "android"
-            keyAlias "androiddebugkey"
-            keyPassword "android"
-        }
-        debug {
-            storeFile file("debug.keystore")
-            storePassword "android"
-            keyAlias "androiddebugkey"
-            keyPassword "android"
-        }
-    }
-    
     defaultConfig {
         applicationId "com.nobody.ultraai"
         minSdk 21
@@ -32,10 +17,9 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.release
         }
         debug {
-            signingConfig signingConfigs.debug
+            debuggable true
         }
     }
     
