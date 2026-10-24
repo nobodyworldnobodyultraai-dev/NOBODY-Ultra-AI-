@@ -21,10 +21,17 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build Debug APK
+      - name: Build Debug APK with Gradle Wrapper Fallback
         run: |
-          chmod +x gradlew || echo "No gradlew"
-          ./gradlew assembleDebug --stacktrace --no-build-cache
+          if [ -f "./gradlew" ]; then
+            chmod +x gradlew
+            ./gradlew assembleDebug --stacktrace --no-daemon
+          else
+            echo "Generating Gradle Wrapper..."
+            gradle wrapper
+            chmod +x gradlew
+            ./gradlew assembleDebug --stacktrace --no-daemon
+          fi
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
